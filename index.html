@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تحدي الأبطال - المهارات الرقمية (خامس / أ)</title>
+  <!-- Tailwind CSS للواجهات والتصميم الحديث -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons للأيقونات -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- مكتبة الاحتفال بالمفرقعات عند الفوز -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+    * {
+      font-family: 'Tajawal', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
+  <!-- الشريط العلوي -->
+<header class="bg-slate-800/90 backdrop-blur-md border-b border-slate-700/80 sticky top-0 z-40 px-4 py-3">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div onclick="navigateTo('welcome')" class="flex items-center gap-3 cursor-pointer group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+          <i data-lucide="trophy" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-black tracking-wide text-white group-hover:text-amber-400 transition-colors">تحدي الأبطال</h1>
+          <p class="text-[11px] text-slate-400 font-medium">المهارات الرقمية • الصف الخامس الابتدائي</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="soundToggleBtn" onclick="toggleSound()" class="p-2 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-300 border border-slate-600/50 transition-all">
+          <i id="soundIcon" data-lucide="volume-2" class="w-5 h-5 text-emerald-400"></i>
+        </button>
+
+        <button id="navTeacherBtn" onclick="handleTeacherNav()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 transition-all">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+          <span>لوحة المعلم</span>
+        </button>
+      </div>
+    </div>
+</header>
+  <!-- الحاوية الرئيسية للشاشات -->
+<main class="flex-1 flex items-center justify-center p-3 sm:p-6">
+    <!-- 1. شاشة الترحيب وتسجيل الطالب -->
+    <div id="screen-welcome" class="w-full max-w-xl bg-slate-800/95 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center p-3.5 bg-gradient-to-tr from-amber-400 via-orange-500 to-indigo-600 rounded-2xl shadow-lg mb-3">
+          <i data-lucide="sparkles" class="w-10 h-10 text-white"></i>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white mb-2">أهلاً بك يا بطل المستقبل! 🚀</h2>
+        <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+          استعد لخوض مغامرة شيقة في <span class="text-amber-400 font-bold">الوحدة الأولى: تعلّم الأساسيات</span>.
+          تحدَّ نفسك في 3 مراحل رائعة مكوّنة من 21 سؤالاً ممتعاً!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2.5 mb-6 text-center text-xs">
+        <div class="p-2.5 rounded-2xl border border-blue-500/30 bg-blue-950/30">
+          <div class="font-extrabold text-blue-400 mb-0.5">المرحلة 1</div>
+          <div class="text-slate-300 font-medium">صح أم خطأ</div>
+          <div class="text-[10px] text-slate-400 mt-1">7 أسئلة</div>
+        </div>
+        <div class="p-2.5 rounded-2xl border border-purple-500/30 bg-purple-950/30">
+          <div class="font-extrabold text-purple-400 mb-0.5">المرحلة 2</div>
+          <div class="text-slate-300 font-medium">اختيار متعدد</div>
+          <div class="text-[10px] text-slate-400 mt-1">7 أسئلة</div>
+        </div>
+        <div class="p-2.5 rounded-2xl border border-amber-500/30 bg-amber-950/30">
+          <div class="font-extrabold text-amber-400 mb-0.5">المرحلة 3</div>
+          <div class="text-slate-300 font-medium">المطابقة</div>
+          <div class="text-[10px] text-slate-400 mt-1">7 أسئلة</div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+            <span>اسم الطالب ثلاثياً (إجباري):</span>
+            <span id="attemptHint" class="text-amber-400 text-[11px] hidden">المحاولة القادمة: #1</span>
+          </label>
+          <input
+            id="studentNameInput"
+            type="text"
+            oninput="checkNameInput()"
+            placeholder="اكتب اسمك هنا مثلاً: أحمد عبدالله السالم"
+            class="w-full bg-slate-900 border-2 border-slate-700 focus:border-amber-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition-all"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">الصف / الفصل المخصص:</label>
+          <div class="flex items-center justify-between bg-slate-900/80 border-2 border-amber-500/50 rounded-xl px-4 py-3 text-sm">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="font-extrabold text-white">الصف: خامس / أ</span>
+            </div>
+            <span class="text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg">
+              محدد تلقائياً ✓
+            </span>
+          </div>
+        </div>
+
+        <button
+          id="startGameBtn"
+          disabled
+          onclick="startGame()"
+          class="w-full py-3.5 rounded-2xl font-black text-base flex items-center justify-center gap-2 transition-all mt-4 bg-slate-700 text-slate-400 cursor-not-allowed opacity-60"
+        >
+          <span>انطلق في التحدي</span>
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. شاشة السؤال واللعب -->
+    <div id="screen-playing" class="w-full max-w-2xl bg-slate-800/95 border border-slate-700/80 rounded-3xl p-5 sm:p-8 shadow-2xl relative hidden">
+      <div class="mb-5">
+        <div class="flex items-center justify-between mb-2">
+          <span id="stageBadge" class="px-2.5 py-1 rounded-lg text-xs font-black text-white bg-indigo-600">
+            المرحلة 1 من 3
+          </span>
+          <div class="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+            <i data-lucide="flame" class="w-4 h-4 fill-amber-400"></i>
+            <span id="scoreDisplay">الدرجة: 0 / 21</span>
+          </div>
+        </div>
+
+        <div class="w-full h-2.5 bg-slate-700/70 rounded-full overflow-hidden p-0.5">
+          <div id="progressBar" class="h-full rounded-full transition-all duration-500 bg-amber-400" style="width: 5%"></div>
+        </div>
+        <div class="flex justify-between items-center text-[11px] text-slate-400 mt-1 font-medium">
+          <span id="questionCounter">السؤال 1 من 21</span>
+          <span id="studentStatusTag">الطالب: -</span>
+        </div>
+      </div>
+
+      <!-- كرت الصورة والسؤال -->
+      <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-900/60 border border-slate-700/60 rounded-2xl p-4 mb-5">
+        <div id="visualCard" class="w-36 h-28 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg flex-shrink-0">
+          <!-- تُحقن الأيقونة والشارة برمجياً -->
+        </div>
+        <div class="flex-1 text-center sm:text-right">
+          <span id="questionTopicBadge" class="inline-block px-2.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-md text-[11px] font-bold mb-2">
+            مفهوم رقمي
+          </span>
+          <h3 id="questionText" class="text-base sm:text-lg font-bold text-white leading-relaxed">
+            نص السؤال يظهر هنا...
+          </h3>
+        </div>
+      </div>
+
+      <!-- قائمة الخيارات -->
+      <div id="optionsContainer" class="space-y-3 mb-6"></div>
+
+      <!-- التغذية الراجعة بعد الإجابة -->
+      <div id="feedbackBox" class="p-4 rounded-2xl border mb-5 hidden"></div>
+
+      <!-- أزرار التحكم -->
+      <button
+        id="actionBtn"
+        onclick="handleActionClick()"
+        class="w-full py-3.5 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-2 transition-all bg-slate-700 text-slate-400 cursor-not-allowed opacity-60"
+      >
+        <span id="actionBtnText">اختر إجابة أولاً</span>
+      </button>
+    </div>
+
+    <!-- 3. شاشة الانتقال بين المراحل -->
+    <div id="screen-stage-transition" class="w-full max-w-lg bg-slate-800/95 border border-slate-700 rounded-3xl p-6 sm:p-8 text-center shadow-2xl hidden">
+      <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center mb-4 shadow-xl animate-bounce">
+        <i data-lucide="award" class="w-10 h-10 text-slate-950"></i>
+      </div>
+      <h3 class="text-xl sm:text-2xl font-black text-white mb-2">مبروك إنجاز رائع! 🎉</h3>
+      <p class="text-slate-300 text-sm mb-5">لقد اجتزت بنجاح المرحلة السابقة واستحققت وسام الأبطال!</p>
+      
+      <div id="nextStageCard" class="p-4 rounded-2xl bg-indigo-600 text-white mb-6 text-right">
+        <div class="text-xs font-bold text-white/80">المرحلة القادمة</div>
+        <div id="nextStageTitle" class="text-lg font-black mt-0.5">المرحلة 2</div>
+        <div id="nextStageSubtitle" class="text-xs text-white/90 mt-1">وصف المرحلة</div>
+      </div>
+
+      <button
+        onclick="continueToNextStage()"
+        class="w-full py-3.5 rounded-2xl font-black text-base bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+      >
+        <span>دخول التحدي التالي</span>
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- 4. شاشة النتيجة النهائية -->
+    <div id="screen-results" class="w-full max-w-xl bg-slate-800/95 border border-slate-700 rounded-3xl p-6 sm:p-8 text-center shadow-2xl hidden">
+      <div class="relative inline-block mb-3">
+        <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-400 via-orange-500 to-yellow-300 flex items-center justify-center shadow-xl mx-auto">
+          <i data-lucide="trophy" class="w-12 h-12 text-slate-950"></i>
+        </div>
+        <span id="resultAttemptBadge" class="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow">
+          المحاولة #1
+        </span>
+      </div>
+
+      <h2 id="resultStudentName" class="text-2xl font-black text-white mb-1">أحسنت يا بطل! 🌟</h2>
+      <p id="resultMetaInfo" class="text-xs sm:text-sm text-slate-400 mb-5">الصف: خامس / أ</p>
+
+      <div class="grid grid-cols-3 gap-3 mb-6">
+        <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-700/70">
+          <div class="text-xs text-slate-400 mb-1 font-semibold">الدرجة النهائية</div>
+          <div id="resScore" class="text-2xl font-black text-amber-400">0 / 21</div>
+        </div>
+        <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-700/70">
+          <div class="text-xs text-slate-400 mb-1 font-semibold">النسبة المئوية</div>
+          <div id="resPercentage" class="text-2xl font-black text-emerald-400">0%</div>
+        </div>
+        <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-700/70">
+          <div class="text-xs text-slate-400 mb-1 font-semibold">صحيح / خطأ</div>
+          <div id="resCorrectWrong" class="text-xl font-black text-cyan-400">0 / 0</div>
+        </div>
+      </div>
+
+      <div id="resultFeedbackText" class="p-4 rounded-2xl bg-slate-900/60 border border-slate-700 text-sm text-slate-300 leading-relaxed mb-6"></div>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button
+          onclick="retryGame()"
+          class="flex-1 py-3.5 rounded-2xl font-black text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+        >
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span>إعادة المحاولة وتحسين النتيجة</span>
+        </button>
+        <button
+          onclick="navigateTo('welcome')"
+          class="py-3.5 px-6 rounded-2xl font-bold text-sm bg-slate-700 hover:bg-slate-600 text-white"
+        >
+          خروج للرئيسية
+        </button>
+      </div>
+    </div>
+
+    <!-- 5. شاشة تسجيل دخول المعلم -->
+    <div id="screen-teacher-login" class="w-full max-w-md bg-slate-800/95 border border-slate-700 rounded-3xl p-6 sm:p-8 text-center shadow-2xl hidden">
+      <div class="w-16 h-16 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-400 flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="lock" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-xl font-black text-white mb-1">تسجيل دخول المعلم</h3>
+      <p class="text-xs text-slate-400 mb-6">أدخل الرمز السري للوصول للوحة النتائج (الرمز: <span class="text-amber-400 font-mono font-bold">1234</span>)</p>
+
+      <form onsubmit="handleTeacherLoginSubmit(event)" class="space-y-4">
+        <input
+          id="teacherPasswordInput"
+          type="password"
+          placeholder="رمز المرور"
+          class="w-full bg-slate-900 border-2 border-slate-700 focus:border-indigo-500 rounded-xl px-4 py-3 text-center text-lg tracking-widest text-white outline-none"
+        />
+        <p id="teacherLoginError" class="text-rose-400 text-xs font-semibold hidden">الرمز غير صحيح، جرّب 1234</p>
+        <div class="flex gap-2">
+          <button type="submit" class="flex-1 py-3 rounded-xl font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer">
+            دخول للوحة التحكم
+          </button>
+          <button type="button" onclick="navigateTo('welcome')" class="px-4 py-3 rounded-xl font-bold text-sm bg-slate-700 text-slate-300">
+            إلغاء
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 6. لوحة تحكم المعلم الشاملة -->
+    <div id="screen-teacher-dashboard" class="w-full max-w-5xl bg-slate-800/95 border border-slate-700 rounded-3xl p-4 sm:p-6 shadow-2xl hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-700">
+        <div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-6 h-6 text-emerald-400"></i>
+            <h2 class="text-xl font-black text-white">لوحة متابعة أداء الطلاب</h2>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">سجل المحاولات وتصدير النتائج لمادة المهارات الرقمية (خامس / أ)</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="exportCSV()" class="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2 shadow-lg cursor-pointer">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>تصدير Excel (CSV)</span>
+          </button>
+          <button onclick="navigateTo('welcome')" class="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-200">
+            العودة للعبة
+          </button>
+        </div>
+      </div>
+
+      <!-- مؤشرات إحصائية -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-5">
+        <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-700/60">
+          <div class="text-slate-400 text-xs mb-1">إجمالي الطلاب</div>
+          <div id="dashTotalStudents" class="text-xl font-black text-white">0</div>
+        </div>
+        <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-700/60">
+          <div class="text-slate-400 text-xs mb-1">إجمالي المحاولات</div>
+          <div id="dashTotalAttempts" class="text-xl font-black text-amber-400">0</div>
+        </div>
+        <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-700/60">
+          <div class="text-slate-400 text-xs mb-1">متوسط الدرجات</div>
+          <div id="dashAvgScore" class="text-xl font-black text-emerald-400">0 / 21</div>
+        </div>
+        <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-700/60">
+          <div class="text-slate-400 text-xs mb-1">أعلى درجة</div>
+          <div id="dashTopScore" class="text-xl font-black text-yellow-400">0 / 21</div>
+        </div>
+      </div>
+
+      <!-- شريط البحث -->
+      <div class="mb-4">
+        <input
+          id="teacherSearchInput"
+          type="text"
+          oninput="renderTeacherTable()"
+          placeholder="ابحث باسم الطالب..."
+          class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none"
+        />
+      </div>
+
+      <!-- جدول البيانات -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-700/80">
+        <table class="w-full text-right text-xs">
+          <thead class="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-700">
+            <tr>
+              <th class="p-3">الترتيب</th>
+              <th class="p-3">اسم الطالب</th>
+              <th class="p-3">الفصل</th>
+              <th class="p-3">عدد المحاولات</th>
+              <th class="p-3">أفضل درجة</th>
+              <th class="p-3">آخر محاولة</th>
+              <th class="p-3 text-center">التفاصيل</th>
+            </tr>
+          </thead>
+          <tbody id="teacherTableBody" class="divide-y divide-slate-800 text-slate-200"></tbody>
+        </table>
+      </div>
+    </div>
+
+</main>
+<footer class="bg-slate-900/80 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
+    <p>تم إعداد اللعبة لمنهاج المهارات الرقمية (الصف الخامس الابتدائي) • الوحدة الأولى: تعلّم الأساسيات</p>
+  </footer>
+  <!-- نافذة منبثقة لتفاصيل محاولات الطالب -->
+<div id="studentDetailModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="w-full max-w-lg bg-slate-850 bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700 mb-4">
+        <div>
+          <h4 id="modalStudentName" class="font-black text-base text-white">اسم الطالب</h4>
+          <p class="text-xs text-slate-400">الفصل: خامس / أ</p>
+        </div>
+        <button onclick="closeModal()" class="p-1 rounded-lg bg-slate-700 text-slate-300">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modalAttemptsList" class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-1"></div>
+
+      <div class="mt-5 pt-3 border-t border-slate-700 text-center">
+        <button onclick="closeModal()" class="w-full py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold">
+          إغلاق
+        </button>
+      </div>
+    </div>
+</div>
+  <!-- منطق اللعبة والبيانات -->
+<script>
+    // الأسئلة الـ 21 النموذجية من ورقة الاختبار المعتمدة
+    const QUESTIONS = [
+      // المرحلة الأولى: صح أو خطأ
+      { id: 1, stage: 1, type: 'bool', question: "يحتوي الحاسب المحمول على بطارية داخلية تساعد على استخدامه في أماكن مختلفة.", options: [{id:'true',text:'صح'},{id:'false',text:'خطأ'}], correctAnswer: 'true', exp: "الحاسب المحمول مزود ببطارية قابلة للشحن تمكنك من استخدامه في أي مكان دون توصيل دائم بالكهرباء.", icon: 'laptop', bg: 'from-blue-600 to-indigo-600', tag: 'الحاسب المحمول' },
+      { id: 2, stage: 1, type: 'bool', question: "تُستخدم شاشة اللمس لعرض المعلومات فقط، ولا يمكن إدخال البيانات من خلالها.", options: [{id:'true',text:'صح'},{id:'false',text:'خطأ'}], correctAnswer: 'false', exp: "شاشة اللمس تُعتبر وحدة إدخال وإخراج معاً؛ تتيح لك إدخال الأوامر باللمس وعرض البيانات.", icon: 'tablet', bg: 'from-teal-600 to-emerald-600', tag: 'شاشة اللمس المزدوجة' },
+      { id: 3, stage: 1, type: 'bool', question: "تنفّذ وحدة المعالجة المركزية العمليات التي تساعد الحاسب على أداء مهامه.", options: [{id:'true',text:'صح'},{id:'false',text:'خطأ'}], correctAnswer: 'true', exp: "وحدة المعالجة المركزية (CPU) هي عقل الحاسب التي تقوم بمعالجة وإدارة العمليات والأوامر.", icon: 'cpu', bg: 'from-amber-600 to-rose-600', tag: 'المعالج CPU' },
+      { id: 4, stage: 1, type: 'bool', question: "يُعدّ الميكروفون من أجهزة إخراج الصوت من الحاسب.", options: [{id:'true',text:'صح'},{id:'false',text:'خطأ'}], correctAnswer: 'false', exp: "الميكروفون هو وحدة إدخال للصوت، بينما مكبرات الصوت وسماعات الرأس هي وحدات الإخراج.", icon: 'mic', bg: 'from-purple-600 to-pink-600', tag: 'وحدات الصوت' },
+      { id: 5, stage: 1, type: 'bool', question: "تنتج الطابعة ثلاثية الأبعاد مجسّمات حقيقية يمكن لمسها.", options: [{id:'true',text:'صح'},{id:'false',text:'خطأ'}], correctAnswer: 'true', exp: "الطابعة ثلاثية الأبعاد تصنع نماذج ومجسمات ملموسة حقيقية ثلاثية الأبعاد.", icon: 'printer', bg: 'from-cyan-600 to-blue-600', tag: 'الطباعة 3D' },
+      { id: 6, stage: 1, type: 'bool', question: "يؤدي حذف اختصار الملف من سطح المكتب إلى حذف الملف الأصلي.", options: [{id:'true',text:'صح'},{id:'false',text:'خطأ'}], correctAnswer: 'false', exp: "حذف أيقونة الاختصار لا يؤثر مطلقاً على الملف الأصلي المخزن في مكانه الأساسي.", icon: 'share-2', bg: 'from-sky-600 to-indigo-600', tag: 'اختصارات الملفات' },
+      { id: 7, stage: 1, type: 'bool', question: "يمكن استعادة ملف من سلة المحذوفات ما دام موجودًا فيها ولم يُحذف نهائيًا.", options: [{id:'true',text:'صح'},{id:'false',text:'خطأ'}], correctAnswer: 'true', exp: "يمكنك استعادة أي ملف من سلة المحذوفات بسهولة ما لم يتم تفريغ السلة بشكل نهائي.", icon: 'trash-2', bg: 'from-red-600 to-rose-700', tag: 'سلة المحذوفات' },
+
+      // المرحلة الثانية: اختيار من متعدد
+      { id: 8, stage: 2, type: 'mcq', question: "أي أجهزة الحاسب الآتية يُدخل المستخدم البيانات إليها باللمس، ولا تحتوي عادةً على لوحة مفاتيح؟", options: [{id:'a',text:"الحاسب المكتبي"},{id:'b',text:"الحاسب اللوحي"},{id:'c',text:"الحاسب المحمول"},{id:'d',text:"مشغّل ألعاب الفيديو"}], correctAnswer: 'b', exp: "الحاسب اللوحي (Tablet) يعتمد على شاشة اللمس المباشرة دون الحاجة للوحة مفاتيح تقليدية.", icon: 'tablet', bg: 'from-fuchsia-600 to-purple-700', tag: 'أنواع الحواسيب' },
+      { id: 9, stage: 2, type: 'mcq', question: "ما الأداة التي تُستخدم بدلًا من الفأرة لتحريك المؤشر في كثير من أجهزة الحاسب المحمولة؟", options: [{id:'a',text:"لوحة اللمس"},{id:'b',text:"الميكروفون"},{id:'c',text:"مكبرات الصوت"},{id:'d',text:"الماسح الضوئي"}], correctAnswer: 'a', exp: "لوحة اللمس (Touchpad) المدمجة بالحاسب المحمول تحل مكان الفأرة لتحريك المؤشر والنقر.", icon: 'mouse-pointer', bg: 'from-indigo-600 to-blue-700', tag: 'أدوات التأشير' },
+      { id: 10, stage: 2, type: 'mcq', question: "ما الجزء الذي يُوصف بأنه «عقل الحاسب» لأنه ينفّذ العمليات؟", options: [{id:'a',text:"ذاكرة الوصول العشوائي"},{id:'b',text:"القرص الصلب"},{id:'c',text:"اللوحة الأم"},{id:'d',text:"وحدة المعالجة المركزية"}], correctAnswer: 'd', exp: "تسمى وحدة المعالجة المركزية (CPU) بعقل الحاسب لأنها مسؤولة عن تنفيذ الأوامر والعمليات.", icon: 'cpu', bg: 'from-amber-600 to-orange-700', tag: 'عقل الحاسب' },
+      { id: 11, stage: 2, type: 'mcq', question: "ما الجهاز الذي يُستخدم لتحويل صورة أو مستند ورقي إلى ملف في الحاسب؟", options: [{id:'a',text:"الطابعة"},{id:'b',text:"الشاشة"},{id:'c',text:"الماسح الضوئي"},{id:'d',text:"مكبر الصوت"}], correctAnswer: 'c', exp: "الماسح الضوئي (Scanner) يلتقط المستندات الورقية ويحولها إلى صور وملفات رقمية في الحاسب.", icon: 'scan', bg: 'from-emerald-600 to-teal-700', tag: 'الماسح الضوئي' },
+      { id: 12, stage: 2, type: 'mcq', question: "ما نوع الطابعة الذي يمكنه إنتاج نماذج ومجسّمات حقيقية؟", options: [{id:'a',text:"الطابعة النافثة للحبر"},{id:'b',text:"الطابعة ثلاثية الأبعاد"},{id:'c',text:"طابعة الليزر"},{id:'d',text:"الطابعة أحادية اللون"}], correctAnswer: 'b', exp: "الطابعة ثلاثية الأبعاد قادرة على تصنيع مجسمات وأشكال ملموسة ثلاثية الأبعاد بدقة.", icon: 'box', bg: 'from-blue-600 to-cyan-600', tag: 'الطابعات الحديثة' },
+      { id: 13, stage: 2, type: 'mcq', question: "ما الفائدة الأساسية من ضغط الملفات والمجلدات؟", options: [{id:'a',text:"حذف الملفات تلقائيًا"},{id:'b',text:"تغيير أسماء الملفات"},{id:'c',text:"تقليل حجمها لتوفير مساحة التخزين"},{id:'d',text:"إغلاق جميع البرامج"}], correctAnswer: 'c', exp: "ضغط الملفات يقلل حجمها مما يوفر مساحة تخزينية ويسهّل نقلها ومشاركتها عبر الإنترنت.", icon: 'archive', bg: 'from-orange-600 to-amber-700', tag: 'ضغط الملفات' },
+      { id: 14, stage: 2, type: 'mcq', question: "أين يمكن حفظ الملفات عبر الإنترنت لفتحها من أجهزة مختلفة؟", options: [{id:'a',text:"التخزين السحابي"},{id:'b',text:"سلة المحذوفات"},{id:'c',text:"ذاكرة الوصول العشوائي"},{id:'d',text:"اللوحة الأم"}], correctAnswer: 'a', exp: "التخزين السحابي (Cloud Storage) يتيح لك حفظ ومزامنة ملفاتك عبر الإنترنت وفتحها في أي وقت ومن أي مكان.", icon: 'cloud', bg: 'from-sky-500 to-blue-600', tag: 'السحابة الرقمية' },
+
+      // المرحلة الثالثة: المطابقة والتعاريف
+      { id: 15, stage: 3, type: 'match', question: "ما الوصف المناسب للمصطلح: «اللوحة الأم»؟", options: [{id:'a',text:"تُستخدم لإجراء مكالمات الفيديو."},{id:'b',text:"يُستخدم لفك ضغط جميع الملفات الموجودة في مجلد مضغوط."},{id:'c',text:"يُتيح الوصول السريع إلى الملف دون تغيير مكانه الأصلي."},{id:'d',text:"تربط مكوّنات الحاسب بعضها ببعض لتعمل معًا."}], correctAnswer: 'd', exp: "اللوحة الأم (Motherboard) هي القطعة الرئيسية التي توصل جميع مكونات الحاسب الداخلية ببعضها.", icon: 'layers', bg: 'from-slate-700 to-slate-900', tag: 'اللوحة الأم' },
+      { id: 16, stage: 3, type: 'match', question: "ما الوصف المناسب للمصطلح: «ذاكرة الوصول العشوائي» (RAM)؟", options: [{id:'a',text:"تحفظ البيانات التي يحتاجها المعالج لفترة قصيرة."},{id:'b',text:"تُستخدم للاستماع إلى الصوت دون إزعاج الآخرين."},{id:'c',text:"تُستخدم لحفظ الملفات ونقلها بسهولة، وتمتاز بصغر حجمها."},{id:'d',text:"تربط مكوّنات الحاسب بعضها ببعض لتعمل معًا."}], correctAnswer: 'a', exp: "ذاكرة RAM هي ذاكرة مؤقتة فائقة السرعة تحفظ البيانات والبرامج النشطة أثناء تشغيل الحاسب.", icon: 'hard-drive', bg: 'from-emerald-600 to-green-700', tag: 'ذاكرة RAM' },
+      { id: 17, stage: 3, type: 'match', question: "ما الوصف المناسب للمصطلح: «وحدة الذاكرة الفلاشية» (USB Flash Drive)؟", options: [{id:'a',text:"تُستخدم لإجراء مكالمات الفيديو."},{id:'b',text:"تُستخدم لحفظ الملفات ونقلها بسهولة، وتمتاز بصغر حجمها."},{id:'c',text:"يُتيح الوصول السريع إلى الملف دون تغيير مكانه الأصلي."},{id:'d',text:"يُستخدم لفك ضغط جميع الملفات الموجودة في مجلد مضغوط."}], correctAnswer: 'b', exp: "الفلاش ميموري جهاز تخزين عملي وخفيف الوزن لنقل وحفظ الملفات بسهولة.", icon: 'usb', bg: 'from-blue-600 to-cyan-700', tag: 'الذاكرة الفلاشية' },
+      { id: 18, stage: 3, type: 'match', question: "ما الوصف المناسب للمصطلح: «كاميرا الويب» (Webcam)؟", options: [{id:'a',text:"تُستخدم لإجراء مكالمات الفيديو."},{id:'b',text:"تُستخدم للاستماع إلى الصوت دون إزعاج الآخرين."},{id:'c',text:"تربط مكوّنات الحاسب بعضها ببعض لتعمل معًا."},{id:'d',text:"تحفظ البيانات التي يحتاجها المعالج لفترة قصيرة."}], correctAnswer: 'a', exp: "كاميرا الويب تنقل الفيديو مباشرة لمحادثات الفيديو والدروس الافتراضية.", icon: 'camera', bg: 'from-indigo-600 to-purple-700', tag: 'كاميرا الويب' },
+      { id: 19, stage: 3, type: 'match', question: "ما الوصف المناسب للمصطلح: «سماعات الرأس» (Headphones)؟", options: [{id:'a',text:"تُستخدم لإجراء مكالمات الفيديو."},{id:'b',text:"تُستخدم للاستماع إلى الصوت دون إزعاج الآخرين."},{id:'c',text:"يُتيح الوصول السريع إلى الملف دون تغيير مكانه الأصلي."},{id:'d',text:"يُستخدم لفك ضغط جميع الملفات."}], correctAnswer: 'b', exp: "سماعات الرأس تمكنك من الاستماع بوضوح وخصوصية دون إزعاج من حولك.", icon: 'headphones', bg: 'from-rose-600 to-pink-700', tag: 'سماعات الرأس' },
+      { id: 20, stage: 3, type: 'match', question: "ما الوصف المناسب لمفهوم: «اختصار الملف» (File Shortcut)؟", options: [{id:'a',text:"يُتيح الوصول السريع إلى الملف دون تغيير مكانه الأصلي."},{id:'b',text:"يُستخدم لفك ضغط جميع الملفات الموجودة في مجلد مضغوط."},{id:'c',text:"تحفظ البيانات التي يحتاجها المعالج لفترة قصيرة."},{id:'d',text:"تربط مكوّنات الحاسب بعضها ببعض."}], correctAnswer: 'a', exp: "الاختصار رابط سريع يمكنك من فتح الملف من سطح المكتب مباشرة دون تغيير موقعه الأصلي.", icon: 'file-text', bg: 'from-sky-600 to-blue-700', tag: 'اختصار الملف' },
+      { id: 21, stage: 3, type: 'match', question: "ما الوصف المناسب لأمر: «استخراج الكل» (Extract All)؟", options: [{id:'a',text:"تُستخدم لحفظ الملفات ونقلها بسهولة."},{id:'b',text:"تُستخدم لإجراء مكالمات الفيديو."},{id:'c',text:"يُستخدم لفك ضغط جميع الملفات الموجودة في مجلد مضغوط."},{id:'d',text:"تحفظ البيانات التي يحتاجها المعالج لفترة قصيرة."}], correctAnswer: 'c', exp: "أمر استخراج الكل يقوم بفك ضغط جميع الملفات داخل المجلد لتعود لحجمها الطبيعي وتصبح جاهزة للاستخدام.", icon: 'folder-archive', bg: 'from-amber-600 to-orange-700', tag: 'استخراج الكل' }
+    ];
+
+    const STAGE_META = {
+      1: { title: "المرحلة الأولى: حراس الحقيقة", sub: "صح أم خطأ • أساسيات ومفاهيم الحواسيب", badge: "المرحلة 1: صح أم خطأ", color: "bg-blue-600" },
+      2: { title: "المرحلة الثانية: الخيارات الذكية", sub: "اختيار من متعدد • أجهزة الإدخال والتخزين", badge: "المرحلة 2: اختيار متعدد", color: "bg-purple-600" },
+      3: { title: "المرحلة الثالثة: قلعة الأبطال", sub: "المطابقة والمفاهيم • تحدي المحترفين النهائي", badge: "المرحلة 3: المطابقة", color: "bg-amber-600" }
+    };
+
+    // نظام الصوت البرمجي Web Audio API
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+      }
+      playTone(freq, type = 'sine', duration = 0.15, delay = 0) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+          setTimeout(() => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+          }, delay * 1000);
+        } catch(e) {}
+      }
+      correct() {
+        this.playTone(523.25, 'triangle', 0.1, 0);
+        this.playTone(659.25, 'triangle', 0.12, 0.08);
+        this.playTone(783.99, 'triangle', 0.25, 0.16);
+      }
+      wrong() {
+        this.playTone(311.13, 'sawtooth', 0.15, 0);
+        this.playTone(261.63, 'sawtooth', 0.25, 0.1);
+      }
+      click() {
+        this.playTone(400, 'sine', 0.04, 0);
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    // حالة التطبيق
+    let currentStudent = "";
+    const studentClass = "خامس / أ";
+    let currentAttemptNum = 1;
+    let currentQuestionIdx = 0;
+    let score = 0;
+    let selectedOptionId = null;
+    let isSubmitted = false;
+    let startTime = null;
+    let durationSec = 0;
+    let isTeacherLoggedIn = false;
+
+    // استرجاع سجلات الطلاب
+    function getStoredAttempts() {
+      try {
+        const data = localStorage.getItem('champions_game_5a_records');
+        if (data) return JSON.parse(data);
+      } catch(e) {}
+      return [];
+    }
+
+    function saveAttempt(record) {
+      const all = getStoredAttempts();
+      all.unshift(record);
+      localStorage.setItem('champions_game_5a_records', JSON.stringify(all));
+    }
+
+    function calculateStudentAttempts(name) {
+      const all = getStoredAttempts();
+      return all.filter(r => r.name.trim().toLowerCase() === name.trim().toLowerCase()).length;
+    }
+
+    // التنقل بين الشاشات
+    function navigateTo(screenName) {
+      sound.click();
+      const screens = ['welcome', 'playing', 'stage-transition', 'results', 'teacher-login', 'teacher-dashboard'];
+      screens.forEach(s => {
+        const el = document.getElementById(`screen-${s}`);
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById(`screen-${screenName}`);
+      if (target) target.classList.remove('hidden');
+
+      // تحديث زر لوحة المعلم
+      const navBtn = document.getElementById('navTeacherBtn');
+      if (screenName === 'teacher-dashboard') {
+        navBtn.innerHTML = `<i data-lucide="compass" class="w-4 h-4"></i><span>واجهة الطالب</span>`;
+        navBtn.onclick = () => navigateTo('welcome');
+      } else {
+        navBtn.innerHTML = `<i data-lucide="lock" class="w-4 h-4"></i><span>لوحة المعلم</span>`;
+        navBtn.onclick = () => handleTeacherNav();
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function checkNameInput() {
+      const val = document.getElementById('studentNameInput').value.trim();
+      const btn = document.getElementById('startGameBtn');
+      const hint = document.getElementById('attemptHint');
+
+      if (val.length >= 3) {
+        btn.disabled = false;
+        btn.className = "w-full py-3.5 rounded-2xl font-black text-base flex items-center justify-center gap-2 transition-all mt-4 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 active:scale-[0.99] shadow-lg shadow-amber-500/30 cursor-pointer";
+        const attCount = calculateStudentAttempts(val);
+        hint.textContent = `المحاولة القادمة: #${attCount + 1}`;
+        hint.classList.remove('hidden');
+      } else {
+        btn.disabled = true;
+        btn.className = "w-full py-3.5 rounded-2xl font-black text-base flex items-center justify-center gap-2 transition-all mt-4 bg-slate-700 text-slate-400 cursor-not-allowed opacity-60";
+        hint.classList.add('hidden');
+      }
+    }
+
+    function startGame() {
+      currentStudent = document.getElementById('studentNameInput').value.trim();
+      currentAttemptNum = calculateStudentAttempts(currentStudent) + 1;
+      currentQuestionIdx = 0;
+      score = 0;
+      selectedOptionId = null;
+      isSubmitted = false;
+      startTime = Date.now();
+      renderQuestion();
+      navigateTo('playing');
+    }
+
+    function renderQuestion() {
+      const q = QUESTIONS[currentQuestionIdx];
+      const stage = STAGE_META[q.stage];
+
+      selectedOptionId = null;
+      isSubmitted = false;
+
+      // تحديث المؤشرات
+      document.getElementById('stageBadge').textContent = stage.badge;
+      document.getElementById('stageBadge').className = `px-2.5 py-1 rounded-lg text-xs font-black text-white ${stage.color}`;
+      document.getElementById('scoreDisplay').textContent = `الدرجة: ${score} / 21`;
+      document.getElementById('progressBar').style.width = `${((currentQuestionIdx + 1) / 21) * 100}%`;
+      document.getElementById('questionCounter').textContent = `السؤال ${currentQuestionIdx + 1} من 21`;
+      document.getElementById('studentStatusTag').textContent = `الطالب: ${currentStudent} (${studentClass})`;
+
+      // كرت الصورة
+      const visual = document.getElementById('visualCard');
+      visual.className = `w-36 h-28 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg flex-shrink-0 bg-gradient-to-br ${q.bg}`;
+      visual.innerHTML = `<i data-lucide="${q.icon}" class="w-10 h-10 mb-1"></i><span class="text-[10px] font-bold bg-black/30 px-2 py-0.5 rounded-md">${q.tag}</span>`;
+
+      document.getElementById('questionTopicBadge').textContent = q.tag;
+      document.getElementById('questionText').textContent = q.question;
+
+      // الخيارات
+      const optBox = document.getElementById('optionsContainer');
+      optBox.innerHTML = '';
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.id = `opt-${opt.id}`;
+        btn.onclick = () => selectOption(opt.id);
+        btn.className = "w-full p-3.5 sm:p-4 rounded-2xl border-2 border-slate-700 bg-slate-900/70 hover:border-slate-500 text-slate-200 text-right transition-all flex items-center justify-between font-semibold text-sm cursor-pointer";
+        btn.innerHTML = `
+          <span class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold">${opt.id === 'true' ? '✓' : opt.id === 'false' ? '✗' : opt.id.toUpperCase()}</span>
+            <span>${opt.text}</span>
+          </span>
+          <span class="feedback-icon"></span>
+        `;
+        optBox.appendChild(btn);
+      });
+
+      // إخفاء صندوق التغذية الراجعة
+      const fb = document.getElementById('feedbackBox');
+      fb.classList.add('hidden');
+      fb.innerHTML = '';
+
+      // زر التأكيد
+      updateActionButton(false, "اختر إجابة أولاً", false);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function selectOption(optId) {
+      if (isSubmitted) return;
+      sound.click();
+      selectedOptionId = optId;
+
+      const q = QUESTIONS[currentQuestionIdx];
+      q.options.forEach(opt => {
+        const btn = document.getElementById(`opt-${opt.id}`);
+        if (opt.id === optId) {
+          btn.className = "w-full p-3.5 sm:p-4 rounded-2xl border-2 border-amber-400 bg-amber-500/20 text-amber-200 text-right transition-all flex items-center justify-between font-semibold text-sm ring-2 ring-amber-400/30";
+        } else {
+          btn.className = "w-full p-3.5 sm:p-4 rounded-2xl border-2 border-slate-700 bg-slate-900/70 text-slate-200 text-right transition-all flex items-center justify-between font-semibold text-sm opacity-60";
+        }
+      });
+
+      updateActionButton(true, "تأكيد الإجابة ✓", true);
+    }
+
+    function updateActionButton(enabled, text, isConfirm) {
+      const btn = document.getElementById('actionBtn');
+      const txt = document.getElementById('actionBtnText');
+      txt.textContent = text;
+
+      if (enabled) {
+        btn.disabled = false;
+        btn.className = isConfirm 
+          ? "w-full py-3.5 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-2 transition-all bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg cursor-pointer"
+          : "w-full py-3.5 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-2 transition-all bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg cursor-pointer";
+      } else {
+        btn.disabled = true;
+        btn.className = "w-full py-3.5 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-2 transition-all bg-slate-700 text-slate-400 cursor-not-allowed opacity-60";
+      }
+    }
+
+    function handleActionClick() {
+      if (!isSubmitted) {
+        // تأكيد الإجابة
+        if (!selectedOptionId) return;
+        isSubmitted = true;
+        const q = QUESTIONS[currentQuestionIdx];
+        const isCorrect = selectedOptionId === q.correctAnswer;
+
+        if (isCorrect) {
+          score++;
+          sound.correct();
+          document.getElementById('scoreDisplay').textContent = `الدرجة: ${score} / 21`;
+        } else {
+          sound.wrong();
+        }
+
+        // تلوين الخيارات
+        q.options.forEach(opt => {
+          const btn = document.getElementById(`opt-${opt.id}`);
+          btn.onclick = null;
+          btn.classList.remove('cursor-pointer');
+          if (opt.id === q.correctAnswer) {
+            btn.className = "w-full p-3.5 sm:p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-950/80 text-emerald-200 text-right flex items-center justify-between font-semibold text-sm";
+            btn.querySelector('.feedback-icon').innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>';
+          } else if (opt.id === selectedOptionId && !isCorrect) {
+            btn.className = "w-full p-3.5 sm:p-4 rounded-2xl border-2 border-rose-500 bg-rose-950/80 text-rose-200 text-right flex items-center justify-between font-semibold text-sm";
+            btn.querySelector('.feedback-icon').innerHTML = '<i data-lucide="x-circle" class="w-5 h-5 text-rose-400"></i>';
+          } else {
+            btn.className = "w-full p-3.5 sm:p-4 rounded-2xl border-2 border-slate-800 bg-slate-900/40 text-slate-500 text-right flex items-center justify-between font-semibold text-sm opacity-50";
+          }
+        });
+
+        // إظهار التفسير التربوي
+        const fb = document.getElementById('feedbackBox');
+        fb.classList.remove('hidden');
+        if (isCorrect) {
+          fb.className = "p-4 rounded-2xl border border-emerald-500/50 bg-emerald-950/40 text-emerald-200 mb-5";
+          fb.innerHTML = `<div class="font-bold flex items-center gap-1.5 mb-1"><i data-lucide="sparkles" class="w-4 h-4"></i> إجابة صحيحة يا بطل! 🌟</div><p class="text-xs sm:text-sm text-slate-300">${q.exp}</p>`;
+        } else {
+          fb.className = "p-4 rounded-2xl border border-rose-500/50 bg-rose-950/40 text-rose-200 mb-5";
+          fb.innerHTML = `<div class="font-bold flex items-center gap-1.5 mb-1"><i data-lucide="help-circle" class="w-4 h-4"></i> تعلّم من المحاولة! 💡</div><p class="text-xs sm:text-sm text-slate-300">${q.exp}</p>`;
+        }
+
+        const nextLabel = (currentQuestionIdx + 1 === 21) ? "مشاهدة النتيجة النهائية 🏆" : "السؤال التالي ⬅";
+        updateActionButton(true, nextLabel, false);
+        if (window.lucide) lucide.createIcons();
+
+      } else {
+        // الانتقال للسؤال التالي
+        sound.click();
+        const nextIdx = currentQuestionIdx + 1;
+        if (nextIdx >= QUESTIONS.length) {
+          finishGame();
+        } else {
+          const currentStage = QUESTIONS[currentQuestionIdx].stage;
+          const nextStage = QUESTIONS[nextIdx].stage;
+
+          if (nextStage !== currentStage) {
+            // شاشة مرحلة جديدة
+            currentQuestionIdx = nextIdx;
+            const nextMeta = STAGE_META[nextStage];
+            document.getElementById('nextStageTitle').textContent = nextMeta.title;
+            document.getElementById('nextStageSubtitle').textContent = nextMeta.sub;
+            document.getElementById('nextStageCard').className = `p-4 rounded-2xl text-white mb-6 text-right ${nextMeta.color}`;
+            navigateTo('stage-transition');
+          } else {
+            currentQuestionIdx = nextIdx;
+            renderQuestion();
+          }
+        }
+      }
+    }
+
+    function continueToNextStage() {
+      sound.click();
+      renderQuestion();
+      navigateTo('playing');
+    }
+
+    function finishGame() {
+      const endTime = Date.now();
+      durationSec = Math.max(1, Math.round((endTime - (startTime || endTime)) / 1000));
+
+      const finalScore = score;
+      const percentage = Math.round((finalScore / 21) * 100);
+      const correctCount = finalScore;
+      const wrongCount = 21 - finalScore;
+
+      const now = new Date();
+      const dateFormatted = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} - ${now.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'})}`;
+
+      // حفظ السجل في قاعدة البيانات المحلية
+      saveAttempt({
+        id: `att_${Date.now()}`,
+        name: currentStudent,
+        classroom: studentClass,
+        attemptNumber: currentAttemptNum,
+        score: finalScore,
+        total: 21,
+        percentage,
+        correctCount,
+        wrongCount,
+        durationSeconds: durationSec,
+        date: dateFormatted
+      });
+
+      // إطلاق المفرقعات الاحتفالية
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+      }
+
+      // تجهيز شاشة النتيجة
+      document.getElementById('resultStudentName').textContent = `أحسنت يا بطلنا ${currentStudent}! 🌟`;
+      document.getElementById('resultMetaInfo').textContent = `الصف: ${studentClass} • وقت الحل: ${formatTime(durationSec)}`;
+      document.getElementById('resultAttemptBadge').textContent = `المحاولة #${currentAttemptNum}`;
+      document.getElementById('resScore').innerHTML = `${finalScore} <span class="text-xs text-slate-400 font-normal">/ 21</span>`;
+      document.getElementById('resPercentage').textContent = `${percentage}%`;
+      document.getElementById('resCorrectWrong').innerHTML = `${correctCount} <span class="text-xs text-rose-400">(${wrongCount} خطأ)</span>`;
+
+      const fbText = document.getElementById('resultFeedbackText');
+      if (finalScore >= 19) {
+        fbText.innerHTML = `<span class="text-amber-400 font-bold text-base block mb-1">🎖️ وسام التميز الرقمي المطلق!</span> أداء عبقري ومتقن! لقد أثبتت فهمك الكامل لجميع مهارات وأجهزة الوحدة الأولى.`;
+      } else if (finalScore >= 15) {
+        fbText.innerHTML = `<span class="text-emerald-400 font-bold text-base block mb-1">👏 مستوى رائع ومتقدم جداً!</span> أحسنت صنعاً يا بطل، راجع الأسئلة التي تعثرت بها وستصل للدرجة الكاملة 21/21 في المحاولة القادمة.`;
+      } else {
+        fbText.innerHTML = `<span class="text-sky-400 font-bold text-base block mb-1">🌱 محاولة طيبة وبداية للنجاح!</span> خضت التحدي بشجاعة، والآن أعد التجربة بتركيز لتحقق نتيجة أعلى وتتفوق على نفسك.`;
+      }
+
+      navigateTo('results');
+    }
+
+    function retryGame() {
+      sound.click();
+      currentAttemptNum = calculateStudentAttempts(currentStudent) + 1;
+      currentQuestionIdx = 0;
+      score = 0;
+      startTime = Date.now();
+      renderQuestion();
+      navigateTo('playing');
+    }
+
+    // إدارة لوحة المعلم
+    function handleTeacherNav() {
+      if (isTeacherLoggedIn) {
+        renderTeacherDashboard();
+        navigateTo('teacher-dashboard');
+      } else {
+        navigateTo('teacher-login');
+      }
+    }
+
+    function handleTeacherLoginSubmit(e) {
+      e.preventDefault();
+      const val = document.getElementById('teacherPasswordInput').value.trim();
+      if (val === '1234' || val === 'admin' || val === 'معلم') {
+        isTeacherLoggedIn = true;
+        document.getElementById('teacherLoginError').classList.add('hidden');
+        renderTeacherDashboard();
+        navigateTo('teacher-dashboard');
+      } else {
+        document.getElementById('teacherLoginError').classList.remove('hidden');
+        sound.wrong();
+      }
+    }
+
+    function renderTeacherDashboard() {
+      const records = getStoredAttempts();
+
+      // تجميع الطلاب
+      const studentMap = {};
+      records.forEach(r => {
+        if (!studentMap[r.name]) {
+          studentMap[r.name] = { name: r.name, classroom: r.classroom, attempts: [] };
+        }
+        studentMap[r.name].attempts.push(r);
+      });
+
+      const studentList = Object.values(studentMap).map(s => {
+        const sorted = [...s.attempts].sort((a,b) => b.score - a.score);
+        const latest = [...s.attempts].sort((a,b) => b.id.localeCompare(a.id))[0];
+        return {
+          name: s.name,
+          classroom: s.classroom,
+          attemptsCount: s.attempts.length,
+          bestScore: sorted[0].score,
+          bestPercentage: sorted[0].percentage,
+          latestDate: latest ? latest.date : '-',
+          attempts: s.attempts
+        };
+      });
+
+      // ترتيب حسب أفضل درجة
+      studentList.sort((a, b) => b.bestScore - a.bestScore);
+
+      // بطاقات الإحصاء
+      document.getElementById('dashTotalStudents').textContent = studentList.length;
+      document.getElementById('dashTotalAttempts').textContent = records.length;
+      const avg = records.length > 0 ? (records.reduce((acc, r) => acc + r.score, 0) / records.length).toFixed(1) : 0;
+      document.getElementById('dashAvgScore').textContent = `${avg} / 21`;
+      document.getElementById('dashTopScore').textContent = studentList.length > 0 ? `${studentList[0].bestScore} / 21` : `0 / 21`;
+
+      renderTeacherTable(studentList);
+    }
+
+    function renderTeacherTable(preList) {
+      const query = (document.getElementById('teacherSearchInput')?.value || '').trim().toLowerCase();
+      let list = preList;
+
+      if (!list) {
+        const records = getStoredAttempts();
+        const map = {};
+        records.forEach(r => {
+          if (!map[r.name]) map[r.name] = { name: r.name, classroom: r.classroom, attempts: [] };
+          map[r.name].attempts.push(r);
+        });
+        list = Object.values(map).map(s => {
+          const sorted = [...s.attempts].sort((a,b) => b.score - a.score);
+          const latest = [...s.attempts].sort((a,b) => b.id.localeCompare(a.id))[0];
+          return {
+            name: s.name,
+            classroom: s.classroom,
+            attemptsCount: s.attempts.length,
+            bestScore: sorted[0].score,
+            bestPercentage: sorted[0].percentage,
+            latestDate: latest ? latest.date : '-',
+            attempts: s.attempts
+          };
+        }).sort((a, b) => b.bestScore - a.bestScore);
+      }
+
+      const filtered = list.filter(s => s.name.toLowerCase().includes(query));
+      const tbody = document.getElementById('teacherTableBody');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">لا توجد محاولات مسجلة بعد.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((st, idx) => {
+        const rank = idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`;
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-750 transition-colors";
+        tr.innerHTML = `
+          <td class="p-3 font-bold ${idx < 3 ? 'text-amber-400' : ''}">${rank}</td>
+          <td class="p-3 font-bold text-white">${st.name}</td>
+          <td class="p-3 text-slate-400">${st.classroom}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-700/50 font-bold">${st.attemptsCount}</span></td>
+          <td class="p-3 font-black text-emerald-400">${st.bestScore} / 21 (${st.bestPercentage}%)</td>
+          <td class="p-3 text-slate-400 text-[11px]">${st.latestDate}</td>
+          <td class="p-3 text-center">
+            <button onclick='viewStudentDetails(${JSON.stringify(st)})' class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 font-bold cursor-pointer">
+              عرض المحاولات
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function viewStudentDetails(student) {
+      sound.click();
+      document.getElementById('modalStudentName').textContent = student.name;
+      const list = document.getElementById('modalAttemptsList');
+      list.innerHTML = '';
+
+      student.attempts.forEach(att => {
+        const row = document.createElement('div');
+        row.className = "p-3 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-between";
+        row.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-xs text-amber-400">المحاولة #${att.attemptNumber}</span>
+              <span class="text-[11px] text-slate-400">(${att.date})</span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-1">المدة: ${formatTime(att.durationSeconds)} • صحيح: ${att.correctCount} • خطأ: ${att.wrongCount}</div>
+          </div>
+          <div class="text-left">
+            <div class="text-base font-black text-emerald-400">${att.score} / 21</div>
+            <div class="text-[10px] text-slate-400 font-bold">${att.percentage}%</div>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+
+      document.getElementById('studentDetailModal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeModal() {
+      document.getElementById('studentDetailModal').classList.add('hidden');
+    }
+
+    function exportCSV() {
+      sound.click();
+      const records = getStoredAttempts();
+      if (records.length === 0) {
+        alert("لا توجد بيانات مسجلة للتصدير حالياً.");
+        return;
+      }
+
+      const headers = ["م", "اسم الطالب", "الصف", "رقم المحاولة", "الدرجة من 21", "النسبة المئوية", "صحيح", "خطأ", "المدة (ثانية)", "تاريخ المحاولة"];
+      const rows = records.map((r, i) => [
+        i + 1,
+        `"${r.name}"`,
+        `"${r.classroom}"`,
+        r.attemptNumber,
+        r.score,
+        `"${r.percentage}%"`,
+        r.correctCount,
+        r.wrongCount,
+        r.durationSeconds,
+        `"${r.date}"`
+      ]);
+
+      const csv = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `نتائج_المهارات_الرقمية_خامس_أ_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function toggleSound() {
+      sound.enabled = !sound.enabled;
+      const icon = document.getElementById('soundIcon');
+      if (sound.enabled) {
+        icon.className = "w-5 h-5 text-emerald-400";
+        sound.click();
+      } else {
+        icon.className = "w-5 h-5 text-rose-400";
+      }
+    }
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const rem = s % 60;
+      if (m === 0) return `${rem} ثانية`;
+      return `${m} دقيقة و ${rem} ثانية`;
+    }
+
+    // تهيئة الأيقونات عند بدء التشغيل
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+    });
+</body>
+</html>
