@@ -120,6 +120,11 @@ button:focus-visible{outline:3px solid var(--sel);outline-offset:3px}
 
 /* start + end */
 .hero{display:flex;flex-direction:column;gap:14px}
+.school{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:14px 18px;border-radius:14px;
+  background:var(--chip);color:var(--chip-ink)}
+.school-name{font-family:var(--display);font-weight:800;font-size:clamp(1.35rem,4.5vw,1.9rem);line-height:1.2}
+.school-teacher{font-weight:700;font-size:clamp(1rem,3vw,1.15rem)}
+.school-teacher span{opacity:.8;font-weight:500;margin-inline-end:4px}
 .plan{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:6px 0}
 @media (max-width:560px){.plan{grid-template-columns:1fr}}
 .plan div{border:2px dashed var(--trace);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px}
@@ -280,16 +285,20 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON
 /* ====== الإعداد: ضع هنا رابط Google Apps Script بعد نشره ====== */
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbzXXPAmz6W91-Hq89pLl69i7rUQPOTjsE80UepGV6ISaNkMGIPK4gORyfjE4dGDF9xc/exec";
 /* ================================================================ */
-const GRADES=["الرابع","الخامس","السادس"];
+const GRADES=["الخامس"];
 const fmtDate=t=>{try{return new Date(t).toLocaleString("ar-SA",{dateStyle:"medium",timeStyle:"short"})}catch(e){return new Date(t).toISOString()}};
-let student=store.get("u1-name",""), grade=store.get("u1-grade","");
+let student=store.get("u1-name",""), grade="الخامس";
 
 function showGameChrome(on){document.querySelector(".hud").hidden=!on;$("#chips").hidden=!on}
 
 function startScreen(){
   S=fresh(); setScore(); renderChips(); stopTimer(); showGameChrome(true);
   screen.innerHTML=`<div class="hero pop">
-    <span class="eyebrow">مهارات رقمية • الوحدة الأولى</span>
+    <div class="school">
+      <div class="school-name">ابتدائية عبدالله بن حذافة</div>
+      <div class="school-teacher"><span>المعلم</span> محمد مقبل الشمراني</div>
+    </div>
+    <span class="eyebrow">مهارات رقمية • الصف الخامس • الوحدة الأولى</span>
     <h1>تحدي تعلّم الأساسيات</h1>
     <p class="muted" style="margin:0">٢١ سؤالًا في ثلاث مراحل. كل إجابة صحيحة = نقطة واحدة.</p>
     <div class="plan">
@@ -297,20 +306,16 @@ function startScreen(){
       <div><b>٢. اختيار من متعدد</b><span class="muted">٧ أسئلة • ٣٠ ثانية لكل سؤال</span></div>
       <div><b>٣. المطابقة</b><span class="muted">٧ أزواج • دقيقتان ونصف للمرحلة</span></div>
     </div>
-    <div class="row" style="align-items:flex-end">
-      <div class="field" style="flex:1 1 260px"><label for="studentName">اسم الطالب الثلاثي</label>
-        <input id="studentName" autocomplete="name" maxlength="40" placeholder="مثال: عبدالله محمد العتيبي" value="${esc(student)}"></div>
-      <div class="field" style="flex:0 1 160px"><label for="grade">الصف</label>
-        <select id="grade" class="sel"><option value="">اختر</option>${GRADES.map(g=>`<option ${g===grade?"selected":""}>${g}</option>`).join("")}</select></div>
-    </div>
+    <div class="field"><label for="studentName">اسم الطالب الثلاثي</label>
+      <input id="studentName" autocomplete="name" maxlength="40" placeholder="مثال: عبدالله محمد العتيبي" value="${esc(student)}"></div>
     <label class="toggle" for="useTimer"><input type="checkbox" id="useTimer" ${useTimer?'checked':''}> تشغيل المؤقّت</label>
     <div class="row"><button class="btn" id="go">ابدأ التحدي</button></div>
     <div><button class="linkbtn" id="toTeacher">لوحة المعلم</button></div>
   </div>`;
   const inp=$("#studentName"),go=$("#go");
-  const gs=$("#grade");const check=()=>{go.disabled=inp.value.trim().length<3||!gs.value};check();inp.oninput=check;gs.onchange=check;
+  const check=()=>{go.disabled=inp.value.trim().length<3};check();inp.oninput=check;
   $("#useTimer").onchange=e=>useTimer=e.target.checked;
-  go.onclick=()=>{student=inp.value.trim().replace(/\s+/g," ");grade=gs.value;store.set("u1-name",student);store.set("u1-grade",grade);beep("tick");nextStage()};
+  go.onclick=()=>{student=inp.value.trim().replace(/\s+/g," ");grade="الخامس";store.set("u1-name",student);beep("tick");nextStage()};
   inp.onkeydown=e=>{if(e.key==="Enter"&&!go.disabled)go.click()};
   $("#toTeacher").onclick=teacherScreen;
 }
@@ -446,8 +451,6 @@ function teacherScreen(){
     </div>
     <p id="tmsg" class="note" aria-live="polite"></p>
     <div class="row" id="tools" hidden>
-      <div class="field" style="flex:0 1 180px"><label for="fgrade">الصف</label>
-        <select id="fgrade" class="sel"><option value="">كل الصفوف</option>${GRADES.map(g=>`<option>${g}</option>`).join("")}</select></div>
       <div class="field" style="flex:1 1 220px"><label for="fname">بحث بالاسم</label><input id="fname" placeholder="اكتب جزءًا من الاسم"></div>
     </div>
     <div id="table"></div>
@@ -457,7 +460,7 @@ function teacherScreen(){
       <button class="btn ghost" id="back">العودة للعبة</button>
     </div>
   </div>`;
-  const filtered=()=>{const g=$("#fgrade").value,n=$("#fname").value.trim();return rows.filter(r=>(!g||r.grade===g)&&(!n||r.name.includes(n)))};
+  const filtered=()=>{const g="",n=$("#fname").value.trim();return rows.filter(r=>(!g||r.grade===g)&&(!n||r.name.includes(n)))};
   const groups=list=>{const by={};list.forEach(r=>{const k=r.grade+"|"+r.name;(by[k]=by[k]||[]).push(r)});
     return Object.values(by).map(l=>l.sort((a,b)=>a.t-b.t)).sort((a,b)=>a[0].grade.localeCompare(b[0].grade,"ar")||a[0].name.localeCompare(b[0].name,"ar"))};
   const render=()=>{
@@ -487,7 +490,7 @@ function teacherScreen(){
   };
   $("#load").onclick=load; $("#refresh").onclick=load;
   $("#tkey").onkeydown=e=>{if(e.key==="Enter")load()};
-  $("#fgrade").onchange=render; $("#fname").oninput=render;
+  $("#fname").oninput=render;
   $("#xlsx").onclick=()=>{
     if(!window.XLSX){$("#tmsg").className="msg-bad";$("#tmsg").textContent="تعذّر تحميل أداة Excel، تأكد من الإنترنت.";return}
     const list=filtered().sort((a,b)=>a.grade.localeCompare(b.grade,"ar")||a.name.localeCompare(b.name,"ar")||a.t-b.t);
