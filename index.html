@@ -1,5 +1,11 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>تحدي تعلّم الأساسيات</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap">
@@ -28,6 +34,7 @@
   --ok:#4cc37f; --ok-soft:#163a27; --bad:#ef6b6b; --bad-soft:#3d1c1c;
   --sel:#6aa6ec; --sel-soft:#1a2f49; color-scheme:dark}
 html,body{min-height:100%}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;
   background-image:linear-gradient(var(--trace) 1px,transparent 1px),linear-gradient(90deg,var(--trace) 1px,transparent 1px);
   background-size:44px 44px;background-position:center}
@@ -129,6 +136,26 @@ button:focus-visible{outline:3px solid var(--sel);outline-offset:3px}
 .review{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
 .review li{padding:10px 12px;border-radius:10px;background:var(--bad-soft);border-inline-start:5px solid var(--bad)}
 .pop{animation:pop .35s ease-out}
+/* student name + result card + teacher panel */
+.field{display:flex;flex-direction:column;gap:6px;max-width:420px}
+.field label{font-weight:700}
+.field input,.sel,textarea{font-family:var(--body);font-size:1.1rem;padding:12px 14px;border-radius:12px;border:2px solid var(--trace);background:var(--board);color:var(--ink);width:100%;box-sizing:border-box}
+.field input:focus,.sel:focus,textarea:focus{outline:none;border-color:var(--chip)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.linkbtn{color:var(--muted);text-decoration:underline;font-size:.95rem;padding:4px 0}
+.card{border:2px dashed var(--copper);border-radius:16px;padding:16px;background:var(--copper-soft);display:flex;flex-direction:column;gap:10px}
+.card .who{display:flex;flex-wrap:wrap;gap:6px 18px;font-weight:700}
+.code{font-family:ui-monospace,Menlo,Consolas,monospace;direction:ltr;text-align:left;background:var(--board);border:2px solid var(--trace);border-radius:10px;padding:10px 12px;word-break:break-all;font-size:.92rem;user-select:all}
+.btn.wa{background:#1f9d55;color:#fff}
+.tablewrap{overflow-x:auto;border:2px solid var(--trace);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;text-align:start;border-bottom:1px solid var(--trace);vertical-align:top}
+th{background:var(--bg);font-size:.92rem;color:var(--muted)}
+.att{display:inline-flex;gap:4px;align-items:baseline;padding:2px 8px;margin:2px;border-radius:8px;background:var(--chip-soft);font-weight:700}
+.att small{color:var(--muted);font-weight:400}
+.att.best{background:var(--ok-soft);outline:2px solid var(--ok)}
+.note{font-size:.92rem;color:var(--muted);margin:0}
+.msg-ok{color:var(--ok);font-weight:700} .msg-bad{color:var(--bad);font-weight:700}
 @keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}
 
 /* illustrations */
@@ -147,6 +174,9 @@ button:focus-visible{outline:3px solid var(--sel);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
+<style>body{margin:0}</style>
+</head>
+<body>
 <div class="wrap">
   <div class="hud">
     <div class="score">النقاط: <b id="score">٠</b> / ٢١</div>
@@ -244,8 +274,20 @@ function startTimer(sec,onEnd){
   draw(); timerId=setInterval(()=>{left--;draw();if(left<=5&&left>0)beep("tick");if(left<=0){stopTimer();onEnd()}},1000);
 }
 
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+/* ====== الإعداد: ضع هنا رابط Google Apps Script بعد نشره ====== */
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbzUPceiUq-kYKWyeaaIwOTCrwEDT-9yLcVv0NMLoE7pwYGrL3Er6GujFi0TqsX1hNlB/exec";
+/* ================================================================ */
+const GRADES=["الرابع","الخامس","السادس"];
+const fmtDate=t=>{try{return new Date(t).toLocaleString("ar-SA",{dateStyle:"medium",timeStyle:"short"})}catch(e){return new Date(t).toISOString()}};
+let student=store.get("u1-name",""), grade=store.get("u1-grade","");
+
+function showGameChrome(on){document.querySelector(".hud").hidden=!on;$("#chips").hidden=!on}
+
 function startScreen(){
-  S=fresh(); setScore(); renderChips(); stopTimer();
+  S=fresh(); setScore(); renderChips(); stopTimer(); showGameChrome(true);
   screen.innerHTML=`<div class="hero pop">
     <span class="eyebrow">مهارات رقمية • الوحدة الأولى</span>
     <h1>تحدي تعلّم الأساسيات</h1>
@@ -255,11 +297,22 @@ function startScreen(){
       <div><b>٢. اختيار من متعدد</b><span class="muted">٧ أسئلة • ٣٠ ثانية لكل سؤال</span></div>
       <div><b>٣. المطابقة</b><span class="muted">٧ أزواج • دقيقتان ونصف للمرحلة</span></div>
     </div>
+    <div class="row" style="align-items:flex-end">
+      <div class="field" style="flex:1 1 260px"><label for="studentName">اسم الطالب الثلاثي</label>
+        <input id="studentName" autocomplete="name" maxlength="40" placeholder="مثال: عبدالله محمد العتيبي" value="${esc(student)}"></div>
+      <div class="field" style="flex:0 1 160px"><label for="grade">الصف</label>
+        <select id="grade" class="sel"><option value="">اختر</option>${GRADES.map(g=>`<option ${g===grade?"selected":""}>${g}</option>`).join("")}</select></div>
+    </div>
     <label class="toggle" for="useTimer"><input type="checkbox" id="useTimer" ${useTimer?'checked':''}> تشغيل المؤقّت</label>
     <div class="row"><button class="btn" id="go">ابدأ التحدي</button></div>
+    <div><button class="linkbtn" id="toTeacher">لوحة المعلم</button></div>
   </div>`;
+  const inp=$("#studentName"),go=$("#go");
+  const gs=$("#grade");const check=()=>{go.disabled=inp.value.trim().length<3||!gs.value};check();inp.oninput=check;gs.onchange=check;
   $("#useTimer").onchange=e=>useTimer=e.target.checked;
-  $("#go").onclick=()=>{beep("tick");nextStage()};
+  go.onclick=()=>{student=inp.value.trim().replace(/\s+/g," ");grade=gs.value;store.set("u1-name",student);store.set("u1-grade",grade);beep("tick");nextStage()};
+  inp.onkeydown=e=>{if(e.key==="Enter"&&!go.disabled)go.click()};
+  $("#toTeacher").onclick=teacherScreen;
 }
 
 function nextStage(){
@@ -345,20 +398,116 @@ function renderMatch(){
   startTimer(st.time,()=>{st.terms.forEach((_,i)=>{if(!M.paired[i])lock(i,false)})});
 }
 
+/* ---------- إرسال المحاولة ---------- */
+async function sendOne(rec){
+  await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(rec)});
+}
+async function flushQueue(){
+  if(!/^https:\/\/script\.google\.com\//.test(SCRIPT_URL)) return false;
+  let q=store.get("u1-queue",[]); if(!q.length) return true;
+  const left=[]; for(const r of q){try{await sendOne(r)}catch(e){left.push(r)}}
+  store.set("u1-queue",left); return !left.length;
+}
+
 function endScreen(){
   stopTimer(); renderChips(); beep("win");
   const s=S.score, stars=s>=19?3:s>=14?2:s>=8?1:0;
+  const counts=store.get("u1-attempts",{}); const key=grade+"|"+student; const attempt=(counts[key]||0)+1; counts[key]=attempt; store.set("u1-attempts",counts);
+  const rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name:student,grade,attempt,score:s,p1:S.perStage[0],p2:S.perStage[1],p3:S.perStage[2],t:Date.now()};
+  const q=store.get("u1-queue",[]); q.push(rec); store.set("u1-queue",q);
   const msg=s===21?"علامة كاملة! أنت خبير في أساسيات الحاسب.":s>=17?"ممتاز! أداء رائع.":s>=12?"جيد جدًا، راجع الأخطاء لتصل للعلامة الكاملة.":"بداية جيدة، راجع الوحدة وحاول مرة أخرى.";
   screen.innerHTML=`<div class="hero pop">
-    <span class="eyebrow">النتيجة النهائية</span>
+    <span class="eyebrow">النتيجة النهائية • ${esc(student)} • الصف ${esc(grade)} • المحاولة ${AR(attempt)}</span>
     <div class="big">${AR(s)}<span> / ٢١</span></div>
     <div class="stars" aria-label="${stars} نجوم">${[0,1,2].map(i=>`<span class="${i<stars?'':'off'}">★</span>`).join("")}</div>
     <h2>${msg}</h2>
     <div class="breakdown">${STAGES.map((st,i)=>`<div><span>${st.name}</span><b>${AR(S.perStage[i])} / ٧</b></div>`).join("")}</div>
+    <p id="sendState" class="note" aria-live="polite">جارٍ إرسال نتيجتك للمعلم…</p>
     ${S.misses.length?`<h3>راجع هذه الإجابات الصحيحة</h3><ul class="review">${S.misses.map(m=>`<li>${m}</li>`).join("")}</ul>`:""}
     <div class="row"><button class="btn" id="again">العب مرة أخرى</button></div>
   </div>`;
+  flushQueue().then(ok=>{const el=$("#sendState");if(!el)return;
+    el.className=ok?"msg-ok":"msg-bad";
+    el.textContent=ok?"✓ وصلت نتيجتك للمعلم.":"لم تُرسل النتيجة بعد لعدم وجود اتصال، وستُرسل تلقائيًا عند فتح اللعبة مرة أخرى."});
   $("#again").onclick=startScreen;
 }
-startScreen();
+
+/* ---------- لوحة المعلم ---------- */
+const xd=t=>{const d=new Date(t),z=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`};
+function teacherScreen(){
+  stopTimer(); showGameChrome(false);
+  let rows=[], key=(()=>{try{return sessionStorage.getItem("u1-key")||""}catch(e){return ""}})();
+  screen.innerHTML=`<div class="hero pop">
+    <span class="eyebrow">لوحة المعلم</span>
+    <h2>محاولات الطلاب</h2>
+    <div class="row" style="align-items:flex-end">
+      <div class="field" style="flex:1 1 220px"><label for="tkey">كلمة مرور المعلم</label><input id="tkey" type="password" value="${esc(key)}"></div>
+      <button class="btn" id="load">عرض النتائج</button>
+    </div>
+    <p id="tmsg" class="note" aria-live="polite"></p>
+    <div class="row" id="tools" hidden>
+      <div class="field" style="flex:0 1 180px"><label for="fgrade">الصف</label>
+        <select id="fgrade" class="sel"><option value="">كل الصفوف</option>${GRADES.map(g=>`<option>${g}</option>`).join("")}</select></div>
+      <div class="field" style="flex:1 1 220px"><label for="fname">بحث بالاسم</label><input id="fname" placeholder="اكتب جزءًا من الاسم"></div>
+    </div>
+    <div id="table"></div>
+    <div class="row">
+      <button class="btn" id="xlsx" hidden>تصدير Excel</button>
+      <button class="btn ghost" id="refresh" hidden>تحديث</button>
+      <button class="btn ghost" id="back">العودة للعبة</button>
+    </div>
+  </div>`;
+  const filtered=()=>{const g=$("#fgrade").value,n=$("#fname").value.trim();return rows.filter(r=>(!g||r.grade===g)&&(!n||r.name.includes(n)))};
+  const groups=list=>{const by={};list.forEach(r=>{const k=r.grade+"|"+r.name;(by[k]=by[k]||[]).push(r)});
+    return Object.values(by).map(l=>l.sort((a,b)=>a.t-b.t)).sort((a,b)=>a[0].grade.localeCompare(b[0].grade,"ar")||a[0].name.localeCompare(b[0].name,"ar"))};
+  const render=()=>{
+    const list=filtered();
+    if(!rows.length){$("#table").innerHTML=`<p class="muted">لا توجد محاولات بعد. ستظهر هنا تلقائيًا عندما يُنهي الطلاب اللعبة.</p>`;return}
+    const gs=groups(list);
+    $("#table").innerHTML=`<p class="note">${AR(gs.length)} طالب • ${AR(list.length)} محاولة. مرّر على أي درجة لترى تاريخها ودرجات مراحلها.</p>
+      <div class="tablewrap"><table><thead><tr><th>اسم الطالب</th><th>الصف</th><th>عدد المحاولات</th><th>درجة كل محاولة</th><th>أعلى درجة</th><th>آخر محاولة</th></tr></thead><tbody>${
+      gs.map(l=>{const best=Math.max(...l.map(r=>r.score)),last=l[l.length-1];
+        return `<tr><td><b>${esc(l[0].name)}</b></td><td>${esc(l[0].grade)}</td><td>${AR(l.length)}</td>
+        <td>${l.map((r,i)=>`<span class="att ${r.score===best?'best':''}" title="${esc(fmtDate(r.t))} • صح/خطأ ${r.p1} • اختيار ${r.p2} • مطابقة ${r.p3}"><small>م${AR(i+1)}</small>${AR(r.score)}</span>`).join("")}</td>
+        <td><b>${AR(best)}</b> / ٢١</td><td class="muted">${esc(fmtDate(last.t))}</td></tr>`}).join("")}</tbody></table></div>`;
+  };
+  const load=async()=>{
+    key=$("#tkey").value.trim(); const m=$("#tmsg");
+    if(!/^https:\/\/script\.google\.com\//.test(SCRIPT_URL)){m.className="msg-bad";m.textContent="لم يُضبط رابط السكربت بعد في الملف (SCRIPT_URL).";return}
+    if(!key){m.className="msg-bad";m.textContent="اكتب كلمة المرور أولًا.";return}
+    m.className="note";m.textContent="جارٍ التحميل…";
+    try{
+      const res=await fetch(SCRIPT_URL+"?key="+encodeURIComponent(key)); const d=await res.json();
+      if(d.error){m.className="msg-bad";m.textContent=d.error;return}
+      rows=d.rows.map(r=>({...r,score:+r.score,p1:+r.p1,p2:+r.p2,p3:+r.p3,t:+r.t}));
+      try{sessionStorage.setItem("u1-key",key)}catch(e){}
+      m.className="msg-ok";m.textContent="آخر تحديث: "+fmtDate(Date.now());
+      ["#tools","#xlsx","#refresh"].forEach(x=>$(x).hidden=false); render();
+    }catch(e){m.className="msg-bad";m.textContent="تعذّر الاتصال بجدول النتائج. تأكد من الإنترنت ومن رابط السكربت."}
+  };
+  $("#load").onclick=load; $("#refresh").onclick=load;
+  $("#tkey").onkeydown=e=>{if(e.key==="Enter")load()};
+  $("#fgrade").onchange=render; $("#fname").oninput=render;
+  $("#xlsx").onclick=()=>{
+    if(!window.XLSX){$("#tmsg").className="msg-bad";$("#tmsg").textContent="تعذّر تحميل أداة Excel، تأكد من الإنترنت.";return}
+    const list=filtered().sort((a,b)=>a.grade.localeCompare(b.grade,"ar")||a.name.localeCompare(b.name,"ar")||a.t-b.t);
+    const n={};const all=list.map(r=>{const k=r.grade+"|"+r.name;n[k]=(n[k]||0)+1;
+      return {"اسم الطالب":r.name,"الصف":r.grade,"رقم المحاولة":n[k],"الدرجة من 21":r.score,"صح أم خطأ (7)":r.p1,"اختيار من متعدد (7)":r.p2,"المطابقة (7)":r.p3,"التاريخ والوقت":xd(r.t)}});
+    const sum=groups(list).map(l=>{const sc=l.map(r=>r.score);return {"اسم الطالب":l[0].name,"الصف":l[0].grade,"عدد المحاولات":l.length,
+      "أعلى درجة":Math.max(...sc),"أول درجة":sc[0],"آخر درجة":sc[sc.length-1],"المتوسط":+(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(1),"درجات المحاولات":sc.join(" - ")}});
+    const wb=XLSX.utils.book_new();
+    const add=(data,name)=>{const ws=XLSX.utils.json_to_sheet(data);ws["!views"]=[{RTL:true}];
+      ws["!cols"]=Object.keys(data[0]||{a:1}).map(k=>({wch:Math.max(12,k.length+4,...data.map(r=>String(r[k]).length+2))}));
+      wb.Workbook=wb.Workbook||{Views:[{RTL:true}]};XLSX.utils.book_append_sheet(wb,ws,name)};
+    add(sum,"ملخص الطلاب"); add(all,"كل المحاولات");
+    XLSX.writeFile(wb,"unit1-results-"+new Date().toISOString().slice(0,10)+".xlsx");
+  };
+  $("#back").onclick=startScreen;
+  if(key) load();
+}
+(location.hash==="#teacher"?teacherScreen:startScreen)();
+flushQueue();
 </script>
+
+</body>
+</html>
