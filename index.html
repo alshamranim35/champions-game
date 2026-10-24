@@ -278,7 +278,7 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 /* ====== الإعداد: ضع هنا رابط Google Apps Script بعد نشره ====== */
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbzUPceiUq-kYKWyeaaIwOTCrwEDT-9yLcVv0NMLoE7pwYGrL3Er6GujFi0TqsX1hNlB/exec";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbzXXPAmz6W91-Hq89pLl69i7rUQPOTjsE80UepGV6ISaNkMGIPK4gORyfjE4dGDF9xc/exec";
 /* ================================================================ */
 const GRADES=["الرابع","الخامس","السادس"];
 const fmtDate=t=>{try{return new Date(t).toLocaleString("ar-SA",{dateStyle:"medium",timeStyle:"short"})}catch(e){return new Date(t).toISOString()}};
